@@ -168,7 +168,20 @@
                 src="about:blank"
                 style="width: 100%; height: 100%; border: 1px solid #ddd; border-radius: 8px;"
                 allowfullscreen></iframe>
+        <div id="viser-loading"
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(255,255,255,0.85); border-radius: 8px;
+                    flex-direction: column; gap: 10px; transition: opacity 0.3s; pointer-events: none;">
+          <div class="spinner-border text-primary" role="status" style="width: 2.2rem; height: 2.2rem;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div style="color: #555; font-size: 0.95rem;">Loading recording (~20&nbsp;MB)&hellip;</div>
+        </div>
       </div>
+      <p class="text-center mt-2 text-muted small mb-0">
+        First load of a scene downloads ~20&nbsp;MB; subsequent visits are cached.
+      </p>
     </div>
   </div>
 
@@ -181,13 +194,27 @@
         "row31754__pred_rgb_sim3.viser"
       ];
       const frame = document.getElementById("viser-frame");
+      const loading = document.getElementById("viser-loading");
       const tabs = document.querySelectorAll(".viser-tab");
       function baseUrl() {
         const p = window.location.pathname;
         const dir = p.endsWith("/") ? p : p.replace(/\/[^\/]*$/, "/");
         return window.location.origin + dir;
       }
+      function showLoading() {
+        loading.style.opacity = "1";
+        loading.style.display = "flex";
+      }
+      function hideLoading() {
+        loading.style.opacity = "0";
+        setTimeout(() => { loading.style.display = "none"; }, 300);
+      }
+      frame.addEventListener("load", () => {
+        // viser-client HTML loaded; give the .viser fetch + parse a moment, then fade
+        setTimeout(hideLoading, 1500);
+      });
       function loadScene(i) {
+        showLoading();
         const recording = baseUrl() + "recordings/" + scenes[i];
         frame.src = baseUrl() + "viser-client/?playbackPath=" + encodeURIComponent(recording);
         tabs.forEach(b => b.classList.toggle("active", Number(b.dataset.scene) === i));
@@ -213,8 +240,8 @@
   <div class="row" style="margin-top: 8px;">
     <div class="col-md-12 text-center">
       <div class="d-flex justify-content-center gap-2 mb-2" id="arm-tabs">
-        <button type="button" class="btn btn-outline-primary arm-tab active" data-arm="yam">YAM&nbsp;Arm</button>
-        <button type="button" class="btn btn-outline-primary arm-tab" data-arm="xarm">xArm7</button>
+        <button type="button" class="btn btn-outline-primary arm-tab active" data-arm="xarm">xArm7</button>
+        <button type="button" class="btn btn-outline-primary arm-tab" data-arm="yam">YAM&nbsp;Arm</button>
       </div>
     </div>
   </div>
@@ -223,7 +250,7 @@
     <div class="col-md-10 offset-md-1 text-center">
       <video id="rollout_video" class="w-100" style="max-width: 1024px; border-radius: 8px;"
              autoplay loop muted playsinline controls>
-        <source src="videos/yam/stack_cubes/v1.mp4" type="video/mp4">
+        <source src="videos/xarm/pick_pineapple/v1.mp4" type="video/mp4">
       </video>
     </div>
   </div>
@@ -317,8 +344,8 @@
     const taskPillContainer = document.getElementById('task-pills');
     const takePills = document.querySelectorAll('#take-pills .subpill');
 
-    let activeArm = 'yam';
-    let activeTask = 'stack_cubes';
+    let activeArm = 'xarm';
+    let activeTask = 'pick_pineapple';
     let activeTake = 'v1';
 
     function renderTaskPills() {
