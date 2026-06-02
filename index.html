@@ -197,21 +197,31 @@
     })();
   </script>
 
-  <!-- ==================== REAL-WORLD YAM DEMOS ==================== -->
+  <!-- ==================== REAL-WORLD ROLLOUTS (combined YAM + xArm) ==================== -->
   <div id="real-world" class="row" style="margin-top: 40px;">
     <div class="col-md-10 offset-md-1">
-      <h3 class="section-title text-center">Real-Robot Demonstrations &mdash; YAM Arm</h3>
+      <h3 class="section-title text-center">Real-Robot Demonstrations</h3>
       <p style="text-align: justify;">
-        PointAction transfers to a <strong>YAM</strong> arm <em>unseen during 4D-video
-        pretraining</em>, using only 20 teleoperated demonstrations per task. Below are
-        rollouts on three manipulation tasks. Click a task to switch demos.
+        PointAction transfers to two robot arms that are <em>unseen during 4D-video
+        pretraining</em>&mdash;a <strong>YAM</strong> arm (20 teleoperated demos per
+        task) and an <strong>xArm7</strong> (50 demos per task). Switch between arms
+        and tasks below; each task has two independent rollouts (Run&nbsp;1 / Run&nbsp;2).
       </p>
     </div>
   </div>
 
   <div class="row" style="margin-top: 8px;">
+    <div class="col-md-12 text-center">
+      <div class="d-flex justify-content-center gap-2 mb-2" id="arm-tabs">
+        <button type="button" class="btn btn-outline-primary arm-tab active" data-arm="yam">YAM&nbsp;Arm</button>
+        <button type="button" class="btn btn-outline-primary arm-tab" data-arm="xarm">xArm7</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 8px;">
     <div class="col-md-10 offset-md-1 text-center">
-      <video id="yam_video" class="w-100" style="max-width: 1024px; border-radius: 8px;"
+      <video id="rollout_video" class="w-100" style="max-width: 1024px; border-radius: 8px;"
              autoplay loop muted playsinline controls>
         <source src="videos/yam/stack_cubes/v1.mp4" type="video/mp4">
       </video>
@@ -221,58 +231,12 @@
   <div class="row">
     <div class="col-md-12 text-center">
       <p class="mt-3 mb-1" style="font-weight: 500;">Task</p>
-      <div class="pill-row" id="yam-task-pills" role="group">
-        <div class="pill scene-pill active" data-task="stack_cubes">
-          <img class="card-img" src="static/img/thumb_stack_cubes.jpg" alt="Stack Cubes">
-          <div class="pill-label">Stack Cubes</div>
-        </div>
-        <div class="pill scene-pill" data-task="pick_pens">
-          <img class="card-img" src="static/img/thumb_pick_pens.jpg" alt="Pick Pens">
-          <div class="pill-label">Pick Pens</div>
-        </div>
-        <div class="pill scene-pill" data-task="insert_cups">
-          <img class="card-img" src="static/img/thumb_insert_cups.jpg" alt="Insert Cups">
-          <div class="pill-label">Insert Cups</div>
-        </div>
-      </div>
+      <div class="pill-row" id="task-pills" role="group"></div>
 
       <p class="mt-3 mb-1" style="font-weight: 500;">Take</p>
-      <div class="subpill-row" id="yam-take-pills">
-        <div class="subpill active" data-take="v1">Run 1</div>
-        <div class="subpill" data-take="v2">Run 2</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== CROSS-EMBODIMENT xArm PLACEHOLDER ==================== -->
-  <div class="row" style="margin-top: 40px;">
-    <div class="col-md-10 offset-md-1">
-      <h3 class="section-title text-center">Real-Robot Demonstrations &mdash; xArm7</h3>
-      <p style="text-align: justify;">
-        We additionally evaluate on an <strong>xArm7</strong>, also unseen during
-        pretraining, with finetuning on 50 expert trajectories per task. We compare
-        against the most recent VLA baselines ($\pi_{0.5}$, GR00T&nbsp;N1.7) on
-        pick-and-place, stack cubes, and stack cups under randomized initial object
-        poses.
-      </p>
-    </div>
-  </div>
-
-  <div class="row" style="margin-top: 10px;">
-    <div class="col-md-10 offset-md-1 text-center">
-      <img src="static/img/xarm_tasks.png" class="img-fluid"
-           alt="xArm7 cross-embodiment setup">
-      <p class="figcaption mt-2">
-        <strong>xArm7 setup &mdash; three evaluation tasks.</strong> Pick-and-place, stack cubes, and stack cups. Test rollouts randomize initial object poses to assess generalization.
-      </p>
-    </div>
-  </div>
-
-  <div class="row" style="margin-top: 16px;">
-    <div class="col-md-10 offset-md-1">
-      <div class="coming-soon">
-        <i class="fas fa-video" style="font-size: 1.6rem;"></i>
-        <p class="mb-0 mt-2"><strong>xArm7 execution videos coming soon.</strong></p>
+      <div class="subpill-row" id="take-pills">
+        <div class="subpill active" data-take="v1">Run&nbsp;1</div>
+        <div class="subpill" data-take="v2">Run&nbsp;2</div>
       </div>
     </div>
   </div>
@@ -332,19 +296,48 @@
 </div> <!-- /container -->
 
 
-<!-- ==================== JS: VIDEO SWITCHER ==================== -->
+<!-- ==================== JS: ARM / TASK / TAKE SWITCHER ==================== -->
 <script>
   (function() {
-    const video = document.getElementById('yam_video');
-    const taskPills = document.querySelectorAll('#yam-task-pills .scene-pill');
-    const takePills = document.querySelectorAll('#yam-take-pills .subpill');
+    const tasksByArm = {
+      yam: [
+        { id: 'stack_cubes', label: 'Stack Cubes', thumb: 'static/img/thumb_stack_cubes.jpg' },
+        { id: 'pick_pens',   label: 'Pick Pens',   thumb: 'static/img/thumb_pick_pens.jpg' },
+        { id: 'insert_cups', label: 'Insert Cups', thumb: 'static/img/thumb_insert_cups.jpg' }
+      ],
+      xarm: [
+        { id: 'pick_pineapple', label: 'Pick Pineapple', thumb: 'static/img/thumb_xarm_pick_pineapple.jpg' },
+        { id: 'stack_cubes',    label: 'Stack Cubes',    thumb: 'static/img/thumb_xarm_stack_cubes.jpg' },
+        { id: 'stack_cups',     label: 'Stack Cups',     thumb: 'static/img/thumb_xarm_stack_cups.jpg' }
+      ]
+    };
 
+    const video = document.getElementById('rollout_video');
+    const armTabs = document.querySelectorAll('.arm-tab');
+    const taskPillContainer = document.getElementById('task-pills');
+    const takePills = document.querySelectorAll('#take-pills .subpill');
+
+    let activeArm = 'yam';
     let activeTask = 'stack_cubes';
     let activeTake = 'v1';
 
+    function renderTaskPills() {
+      taskPillContainer.innerHTML = '';
+      tasksByArm[activeArm].forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'pill scene-pill' + (t.id === activeTask ? ' active' : '');
+        div.dataset.task = t.id;
+        div.innerHTML = `<img class="card-img" src="${t.thumb}" alt="${t.label}"><div class="pill-label">${t.label}</div>`;
+        div.addEventListener('click', () => {
+          activeTask = t.id;
+          updateAll();
+        });
+        taskPillContainer.appendChild(div);
+      });
+    }
+
     function updateVideo() {
-      const newSrc = `videos/yam/${activeTask}/${activeTake}.mp4`;
-      // Only swap if different to avoid restart flicker on no-op clicks
+      const newSrc = `videos/${activeArm}/${activeTask}/${activeTake}.mp4`;
       const currentSrc = video.currentSrc.split('/').slice(-3).join('/');
       if (!currentSrc.endsWith(newSrc)) {
         video.querySelector('source').src = newSrc;
@@ -353,30 +346,29 @@
       }
     }
 
-    function updatePillStates() {
-      taskPills.forEach(p => {
-        p.classList.toggle('active', p.dataset.task === activeTask);
-      });
-      takePills.forEach(p => {
-        p.classList.toggle('active', p.dataset.take === activeTake);
-      });
+    function updateAll() {
+      renderTaskPills();
+      takePills.forEach(p => p.classList.toggle('active', p.dataset.take === activeTake));
+      armTabs.forEach(b => b.classList.toggle('active', b.dataset.arm === activeArm));
+      updateVideo();
     }
 
-    taskPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        activeTask = pill.dataset.task;
-        updatePillStates();
-        updateVideo();
+    armTabs.forEach(b => {
+      b.addEventListener('click', () => {
+        activeArm = b.dataset.arm;
+        activeTask = tasksByArm[activeArm][0].id;  // reset to first task on arm switch
+        updateAll();
       });
     });
 
-    takePills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        activeTake = pill.dataset.take;
-        updatePillStates();
-        updateVideo();
+    takePills.forEach(p => {
+      p.addEventListener('click', () => {
+        activeTake = p.dataset.take;
+        updateAll();
       });
     });
+
+    renderTaskPills();
   })();
 </script>
 
