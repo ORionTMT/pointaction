@@ -147,6 +147,56 @@
     </div>
   </div>
 
+  <!-- ==================== INTERACTIVE 4D VIEWER ==================== -->
+  <div class="row" id="viser-section" style="margin-top: 40px;">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">Interactive 4D Generation Viewer</h3>
+      <p style="text-align: justify;">
+        Drag, zoom, and replay our jointly generated RGB&nbsp;+&nbsp;3D point trajectories directly in
+        your browser. Use the buttons below to switch between four sample scenes; each viewer is fully
+        interactive&mdash;left-click to rotate, scroll to zoom, right-click to pan, and use the
+        timeline to scrub through time.
+      </p>
+      <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" id="viser-tabs">
+        <button type="button" class="btn btn-outline-primary viser-tab active" data-scene="0">Scene&nbsp;1</button>
+        <button type="button" class="btn btn-outline-primary viser-tab" data-scene="1">Scene&nbsp;2</button>
+        <button type="button" class="btn btn-outline-primary viser-tab" data-scene="2">Scene&nbsp;3</button>
+        <button type="button" class="btn btn-outline-primary viser-tab" data-scene="3">Scene&nbsp;4</button>
+      </div>
+      <div style="position: relative; width: 100%; height: 600px;">
+        <iframe id="viser-frame"
+                src="about:blank"
+                style="width: 100%; height: 100%; border: 1px solid #ddd; border-radius: 8px;"
+                allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const scenes = [
+        "bridge_top2_row78__pred_rgb_sim3.viser",
+        "bridge_top4_row30__pred_rgb_sim3.viser",
+        "droid_top1_row34__pred_rgb_sim3.viser",
+        "row31754__pred_rgb_sim3.viser"
+      ];
+      const frame = document.getElementById("viser-frame");
+      const tabs = document.querySelectorAll(".viser-tab");
+      function baseUrl() {
+        const p = window.location.pathname;
+        const dir = p.endsWith("/") ? p : p.replace(/\/[^\/]*$/, "/");
+        return window.location.origin + dir;
+      }
+      function loadScene(i) {
+        const recording = baseUrl() + "recordings/" + scenes[i];
+        frame.src = baseUrl() + "viser-client/?playbackPath=" + encodeURIComponent(recording);
+        tabs.forEach(b => b.classList.toggle("active", Number(b.dataset.scene) === i));
+      }
+      tabs.forEach(b => b.addEventListener("click", () => loadScene(Number(b.dataset.scene))));
+      loadScene(0);
+    })();
+  </script>
+
   <!-- ==================== REAL-WORLD YAM DEMOS ==================== -->
   <div id="real-world" class="row" style="margin-top: 40px;">
     <div class="col-md-10 offset-md-1">
