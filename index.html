@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>PointAction: 3D Points as Universal Action Representations for Robot Control</title>
+  <meta name="description"
+        content="PointAction proposes 3D point dynamics as a universal action interface for robot control, bridging 2D video generation priors and embodiment-agnostic manipulation policies.">
+
+  <meta property="og:title" content="PointAction: 3D Points as Universal Action Representations for Robot Control" />
+  <meta property="og:description"
+        content="PointAction proposes 3D point dynamics as a universal action interface for robot control." />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body style="padding: 4%; padding-top: min(15px, 4%); padding-bottom: min(20px, 4%);">
+
+<div class="container-lg text-center" style="max-width: 1200px; margin: auto;">
+
+  <!-- ==================== TITLE + AUTHORS + LINKS ==================== -->
+  <div class="row">
+    <h2 class="col-md-12 text-center" style="line-height: 1.3;">
+      <b>PointAction: 3D Points as Universal Action Representations<br>for Robot Control</b>
+    </h2>
+  </div>
+
+  <div class="row text-center" style="margin-top: 10px;">
+    <h4 class="col-md-12 text-center"><i>arXiv 2026</i></h4>
+  </div>
+
+  <div class="row text-center" style="margin-top: 12px;">
+    <div class="col-md-12 text-center">
+      <ul class="list-inline" style="padding-left: 0;">
+        <li>Mutian Tong<sup>&dagger;</sup></li>
+        <li>Han Jiang<sup>&dagger;</sup></li>
+        <li>Qiao Feng</li>
+        <li>Lingjie Liu</li>
+        <li>Jiatao Gu</li>
+      </ul>
+      <div class="text-muted" style="font-size: 0.9rem; margin-top: 4px;">
+        <sup>&dagger;</sup> Equal contribution.
+      </div>
+    </div>
+  </div>
+
+  <div class="publication-links">
+    <span class="link-block">
+      <a href="#" class="button is-rounded is-disabled">
+        <i class="fas fa-file-pdf"></i>&nbsp;Paper&nbsp;(coming&nbsp;soon)
+      </a>
+    </span>
+    <span class="link-block">
+      <a href="#" class="button is-rounded is-disabled">
+        <i class="fab fa-github"></i>&nbsp;Code&nbsp;(coming&nbsp;soon)
+      </a>
+    </span>
+    <span class="link-block">
+      <a href="#real-world" class="button is-rounded">
+        <i class="fas fa-video"></i>&nbsp;Real-Robot&nbsp;Demos
+      </a>
+    </span>
+  </div>
+
+  <!-- ==================== TEASER ==================== -->
+  <div class="row" style="margin-top: 10px;">
+    <div class="col-md-12 text-center">
+      <img src="static/img/teaser.png" class="img-fluid" alt="PointAction teaser">
+      <p class="figcaption mt-3 mx-auto" style="max-width: 900px;">
+        <strong>TL;DR:</strong> From an input image and instruction, PointAction jointly synthesizes
+        consistent RGB frames and dynamic, pixel-aligned 3D point maps (XYZ). These
+        <em>3D point dynamics</em> serve as a generalizable, embodiment-agnostic action
+        representation, bridging 2D video priors to robust visuomotor control.
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== ABSTRACT ==================== -->
+  <div class="section-band">
+    <div class="row">
+      <div class="col-md-10 offset-md-1">
+        <h3 class="text-center">Abstract</h3>
+        <p style="text-align: justify;">
+          Vision-Language-Action (VLA) models have demonstrated strong manipulation
+          capabilities, but frequently struggle with unseen tasks and environments.
+          Recent Video-Action Models (VAMs) leverage physical and dynamic priors from
+          pre-trained video diffusion models, achieving robust generalizability.
+          However, existing approaches face two fundamental challenges:
+          (i) grounding RGB-only rollouts into precise actions is inherently ambiguous
+          because contact geometry and fine-grained spatial constraints are
+          under-specified, and (ii) scaling to broad task and embodiment coverage
+          remains bottlenecked by costly paired observation&ndash;action supervision.
+          We present <strong>PointAction</strong>, a framework that bridges video
+          predictions to robot actions via explicit point-based 4D modeling. We
+          first fine-tune a foundation robot video model to jointly generate RGB
+          frames and dynamic 3D pointmaps, and then map the predicted 3D point
+          dynamics to executable robot actions through a diffusion-based decoder.
+          Comprehensive evaluations show that PointAction achieves state-of-the-art
+          4D generation quality on robot scenes, outperforms existing VLA and VAM
+          baselines on simulation benchmarks, and demonstrates cross-embodiment
+          generalization to two real robot arms unseen during pretraining.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== METHOD OVERVIEW ==================== -->
+  <div class="row">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">Method Overview</h3>
+      <p style="text-align: justify;">
+        PointAction factorizes manipulation into an <em>embodiment-agnostic</em> 4D
+        video&ndash;action model and an <em>embodiment-specific</em> point-to-action
+        decoder. The 4D model is fine-tuned from a foundation robot video backbone to
+        jointly generate RGB and XYZ pointmaps via width-wise latent concatenation, so
+        each visual patch is paired with its geometric counterpart inside DiT
+        self-attention blocks. A lightweight conditional DiT decoder then denoises the
+        full action sequence from per-frame point features, with the initial robot
+        state and diffusion step injected via AdaLN.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 14px;">
+    <div class="col-md-10 offset-md-1 text-center">
+      <img src="static/img/pipeline_stage1.png" class="img-fluid"
+           alt="Stage 1: Universal 4D video-action model">
+      <p class="figcaption mt-2">
+        <strong>Stage 1: Universal 4D Video-Action Model.</strong> A foundation video
+        diffusion model is lifted to jointly generate RGB and XYZ pointmaps by
+        concatenating their VAE latents along the width dimension. We train with a
+        flow-matching objective under diffusion forcing on cross-arm robot videos.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 24px;">
+    <div class="col-md-10 offset-md-1 text-center">
+      <img src="static/img/pipeline_stage2.png" class="img-fluid"
+           alt="Stage 2: Point-to-action decoder">
+      <p class="figcaption mt-2">
+        <strong>Stage 2: Point-to-Action Decoder.</strong> Robot-centric point clouds
+        are downsampled with FPS, encoded by a PointNet-style MLP, and fed into a thin
+        conditional DiT that denoises the action sequence in parallel.
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== REAL-WORLD YAM DEMOS ==================== -->
+  <div id="real-world" class="row" style="margin-top: 40px;">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">Real-Robot Demonstrations &mdash; YAM Arm</h3>
+      <p style="text-align: justify;">
+        PointAction transfers to a <strong>YAM</strong> arm <em>unseen during 4D-video
+        pretraining</em>, using only 20 teleoperated demonstrations per task. Below are
+        rollouts on three manipulation tasks. Click a task to switch demos.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 8px;">
+    <div class="col-md-10 offset-md-1 text-center">
+      <video id="yam_video" class="w-100" style="max-width: 1024px; border-radius: 8px;"
+             autoplay loop muted playsinline controls>
+        <source src="videos/yam/stack_cubes/v1.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <p class="mt-3 mb-1" style="font-weight: 500;">Task</p>
+      <div class="pill-row" id="yam-task-pills" role="group">
+        <div class="pill scene-pill active" data-task="stack_cubes">
+          <img class="card-img" src="static/img/thumb_stack_cubes.jpg" alt="Stack Cubes">
+          <div class="pill-label">Stack Cubes</div>
+        </div>
+        <div class="pill scene-pill" data-task="pick_pens">
+          <img class="card-img" src="static/img/thumb_pick_pens.jpg" alt="Pick Pens">
+          <div class="pill-label">Pick Pens</div>
+        </div>
+        <div class="pill scene-pill" data-task="insert_cups">
+          <img class="card-img" src="static/img/thumb_insert_cups.jpg" alt="Insert Cups">
+          <div class="pill-label">Insert Cups</div>
+        </div>
+      </div>
+
+      <p class="mt-3 mb-1" style="font-weight: 500;">Take</p>
+      <div class="subpill-row" id="yam-take-pills">
+        <div class="subpill active" data-take="v1">Run 1</div>
+        <div class="subpill" data-take="v2">Run 2</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CROSS-EMBODIMENT xArm PLACEHOLDER ==================== -->
+  <div class="row" style="margin-top: 40px;">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">Real-Robot Demonstrations &mdash; xArm7</h3>
+      <p style="text-align: justify;">
+        We additionally evaluate on an <strong>xArm7</strong>, also unseen during
+        pretraining, with finetuning on 50 expert trajectories per task. We compare
+        against the most recent VLA baselines ($\pi_{0.5}$, GR00T&nbsp;N1.7) on
+        pick-and-place, stack cubes, and stack cups under randomized initial object
+        poses.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 10px;">
+    <div class="col-md-10 offset-md-1 text-center">
+      <img src="static/img/xarm_tasks.png" class="img-fluid"
+           alt="xArm7 cross-embodiment setup">
+      <p class="figcaption mt-2">
+        <strong>xArm7 setup &mdash; three evaluation tasks.</strong> Pick-and-place, stack cubes, and stack cups. Test rollouts randomize initial object poses to assess generalization.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 16px;">
+    <div class="col-md-10 offset-md-1">
+      <div class="coming-soon">
+        <i class="fas fa-video" style="font-size: 1.6rem;"></i>
+        <p class="mb-0 mt-2"><strong>xArm7 execution videos coming soon.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 4D GENERATION QUALITATIVE ==================== -->
+  <div class="row" style="margin-top: 40px;">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">4D Generation Quality</h3>
+      <p style="text-align: justify;">
+        The action decoder relies on temporally and geometrically consistent 4D
+        rollouts from the upstream video&ndash;action model. Below are qualitative
+        rollouts on held-out trajectories from DROID and BridgeData&nbsp;V2,
+        visualizing RGB frames, predicted XYZ pointmaps, and the pointmaps rendered
+        as 3D point clouds across four timesteps.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 6px;">
+    <div class="col-md-10 offset-md-1 text-center">
+      <img src="static/img/qual_4d.png" class="img-fluid" alt="Qualitative 4D rollouts">
+      <p class="figcaption mt-2">
+        <strong>Qualitative 4D generation by PointAction on real-world rollouts.</strong>
+        Top: a held-out trajectory from DROID; bottom: a held-out trajectory from
+        BridgeData&nbsp;V2. Columns are four uniformly sampled timesteps. Rows: (a)
+        generated RGB frames, (b) generated XYZ pointmaps, (c) rendered XYZ as a 3D
+        point cloud.
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== SIMULATION ROLLOUTS ==================== -->
+  <div class="row" style="margin-top: 40px;">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">Simulation Rollouts on RoboCasa365</h3>
+      <p style="text-align: justify;">
+        In simulation, PointAction reaches the highest average success rate across
+        in-distribution, OOD-environment, and OOD-task regimes on RoboCasa365,
+        outperforming both the strongest VLA baselines (GR00T&nbsp;N1.5, $\pi_0$) and
+        VAM baselines (VPP, Cosmos&nbsp;Policy). Below: qualitative comparisons
+        between predicted videos and actual physical robot executions.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 8px;">
+    <div class="col-md-10 offset-md-1 text-center">
+      <img src="static/img/sim_qual.png" class="img-fluid" alt="Simulation rollouts">
+      <p class="figcaption mt-2">
+        <strong>Qualitative rollouts on RoboCasa365.</strong> Each row shows a different
+        manipulation task. Predicted video frames (top) align spatio-temporally with
+        actual physical executions (bottom).
+      </p>
+    </div>
+  </div>
+
+</div> <!-- /container -->
+
+
+<!-- ==================== JS: VIDEO SWITCHER ==================== -->
+<script>
+  (function() {
+    const video = document.getElementById('yam_video');
+    const taskPills = document.querySelectorAll('#yam-task-pills .scene-pill');
+    const takePills = document.querySelectorAll('#yam-take-pills .subpill');
+
+    let activeTask = 'stack_cubes';
+    let activeTake = 'v1';
+
+    function updateVideo() {
+      const newSrc = `videos/yam/${activeTask}/${activeTake}.mp4`;
+      // Only swap if different to avoid restart flicker on no-op clicks
+      const currentSrc = video.currentSrc.split('/').slice(-3).join('/');
+      if (!currentSrc.endsWith(newSrc)) {
+        video.querySelector('source').src = newSrc;
+        video.load();
+        video.play().catch(() => {});
+      }
+    }
+
+    function updatePillStates() {
+      taskPills.forEach(p => {
+        p.classList.toggle('active', p.dataset.task === activeTask);
+      });
+      takePills.forEach(p => {
+        p.classList.toggle('active', p.dataset.take === activeTake);
+      });
+    }
+
+    taskPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        activeTask = pill.dataset.task;
+        updatePillStates();
+        updateVideo();
+      });
+    });
+
+    takePills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        activeTake = pill.dataset.take;
+        updatePillStates();
+        updateVideo();
+      });
+    });
+  })();
+</script>
+
+<!-- MathJax for inline LaTeX (e.g., $\pi_{0.5}$) -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</body>
+</html>

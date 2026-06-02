@@ -1,0 +1,139 @@
+/* ============================================================
+   PointAction project page — adapted from Sig25-4DLighting style
+   ============================================================ */
+
+body,
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #1a1a1a;
+}
+
+h2 b { font-weight: 700; }
+
+a, a:visited { color: #1772d0; }
+a:hover { color: #0a5cad; text-decoration: none; }
+
+/* Author list horizontal layout */
+.list-inline > li {
+  display: inline-block;
+  padding: 0 14px;
+}
+
+/* CTA buttons */
+.publication-links { margin: 16px 0 8px 0; }
+.publication-links .link-block { margin: 0 4px; display: inline-block; }
+.button.is-rounded {
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: #1f2937;
+  color: #fff !important;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.button.is-rounded:hover { background: #0a5cad; }
+.button.is-rounded.is-disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Pill selector for switching demo videos */
+.pill-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0;
+}
+.pill {
+  cursor: pointer;
+  padding: 4px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: inline-block;
+  transition: background-color 0.2s, transform 0.2s;
+  background: #fff;
+}
+.scene-pill {
+  width: 140px;
+  text-align: center;
+}
+.scene-pill img.card-img {
+  width: 100%;
+  border-radius: 6px;
+  display: block;
+}
+.scene-pill .pill-label {
+  font-size: 0.9rem;
+  margin-top: 4px;
+  color: #1a1a1a;
+}
+.scene-pill:hover { transform: scale(1.04); }
+.scene-pill.active {
+  background: #1772d0;
+  border-color: #1772d0;
+}
+.scene-pill.active .pill-label { color: #fff; font-weight: 500; }
+
+/* Subselector (between v1/v2 within a task) */
+.subpill-row { display: flex; justify-content: center; gap: 8px; margin: 10px 0; }
+.subpill {
+  cursor: pointer;
+  padding: 4px 14px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: #fff;
+  transition: background 0.2s, color 0.2s;
+}
+.subpill:hover { background: #f4f4f4; }
+.subpill.active { background: #1772d0; color: #fff; border-color: #1772d0; }
+
+/* Section banding */
+.section-band {
+  background-color: #f7f7f7;
+  width: 100%;
+  padding: 32px 0;
+  margin: 24px 0;
+  border-radius: 8px;
+}
+
+/* Coming-soon placeholder */
+.coming-soon {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  background: #fafafa;
+}
+
+/* Caption spacing */
+.figcaption {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-top: 8px;
+  text-align: justify;
+}
+
+.section-title {
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+/* Citation block */
+#bibtex {
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.85rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+}
