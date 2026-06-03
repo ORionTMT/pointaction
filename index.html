@@ -182,6 +182,24 @@
           <div style="color: #555; font-size: 0.95rem;">Loading recording (~20&nbsp;MB)&hellip;</div>
         </div>
       </div>
+
+      <!-- Generated 2D video + 3D point-map viz (synced with the viser viewer above) -->
+      <p class="text-center text-muted mt-3 mb-2" style="font-size: 0.95rem;">
+        <em>Underlying generated video and 3D point map for the selected scene
+        (RGB&nbsp;|&nbsp;pixel-aligned XYZ pointmap)</em>
+      </p>
+      <div class="row g-2 g-md-3">
+        <div class="col-6">
+          <video id="viser-rgb-video" class="w-100"
+                 style="border: 1px solid #ddd; border-radius: 6px; background: #f8f8f8;"
+                 autoplay loop muted playsinline></video>
+        </div>
+        <div class="col-6">
+          <video id="viser-xyz-video" class="w-100"
+                 style="border: 1px solid #ddd; border-radius: 6px; background: #f8f8f8;"
+                 autoplay loop muted playsinline></video>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -196,6 +214,8 @@
       const frame = document.getElementById("viser-frame");
       const loading = document.getElementById("viser-loading");
       const tabs = document.querySelectorAll(".viser-tab");
+      const rgbVideo = document.getElementById("viser-rgb-video");
+      const xyzVideo = document.getElementById("viser-xyz-video");
       function baseUrl() {
         const p = window.location.pathname;
         const dir = p.endsWith("/") ? p : p.replace(/\/[^\/]*$/, "/");
@@ -213,11 +233,32 @@
         // viser-client HTML loaded; give the .viser fetch + parse a moment, then fade
         setTimeout(hideLoading, 1500);
       });
+      function swapAndStartVideos(sceneIdx) {
+        const sceneNum = sceneIdx + 1;
+        const newRgb = "static/videos/viser/scene" + sceneNum + "_rgb.mp4";
+        const newXyz = "static/videos/viser/scene" + sceneNum + "_xyz.mp4";
+        rgbVideo.src = newRgb;
+        xyzVideo.src = newXyz;
+        // After both load enough data, restart from 0 together to keep them in sync.
+        let readyCount = 0;
+        const startBoth = () => {
+          if (++readyCount < 2) return;
+          rgbVideo.currentTime = 0;
+          xyzVideo.currentTime = 0;
+          Promise.all([rgbVideo.play().catch(() => {}),
+                       xyzVideo.play().catch(() => {})]);
+        };
+        rgbVideo.addEventListener("loadeddata", startBoth, { once: true });
+        xyzVideo.addEventListener("loadeddata", startBoth, { once: true });
+        rgbVideo.load();
+        xyzVideo.load();
+      }
       function loadScene(i) {
         showLoading();
         const recording = baseUrl() + "recordings/" + scenes[i];
         frame.src = baseUrl() + "viser-client/?playbackPath=" + encodeURIComponent(recording);
         tabs.forEach(b => b.classList.toggle("active", Number(b.dataset.scene) === i));
+        swapAndStartVideos(i);
       }
       tabs.forEach(b => b.addEventListener("click", () => loadScene(Number(b.dataset.scene))));
       loadScene(0);
