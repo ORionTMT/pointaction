@@ -361,6 +361,52 @@
     </div>
   </div>
 
+  <!-- ==================== CITATION ==================== -->
+  <div class="row" style="margin-top: 40px;">
+    <div class="col-md-10 offset-md-1">
+      <h3 class="section-title text-center">Citation</h3>
+      <p class="text-center text-muted" style="font-size: 0.95rem;">
+        If you find our work useful, please consider citing:
+      </p>
+      <div style="position: relative; background: #f5f6f8; border: 1px solid #e1e3e8;
+                  border-radius: 8px; padding: 20px 22px; margin-top: 10px;">
+        <button id="cite-copy-btn" type="button"
+                style="position: absolute; top: 10px; right: 10px; padding: 4px 12px;
+                       font-size: 0.85rem; background: #fff; border: 1px solid #ccc;
+                       border-radius: 6px; cursor: pointer; color: #333;">
+          <i class="far fa-copy"></i>&nbsp;Copy
+        </button>
+        <pre id="cite-bibtex" style="margin: 0; white-space: pre-wrap; word-break: break-word;
+                                      font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+                                      font-size: 0.88rem; color: #2a2a30; background: transparent;
+                                      border: none;">@misc{tong2026pointaction3dpointsuniversal,
+      title={PointAction: 3D Points as Universal Action Representations for Robot Control},
+      author={Mutian Tong and Han Jiang and Qiao Feng and Lingjie Liu and Jiatao Gu},
+      year={2026},
+      eprint={2606.03943},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2606.03943},
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const btn = document.getElementById('cite-copy-btn');
+      const pre = document.getElementById('cite-bibtex');
+      if (!btn || !pre) return;
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+          const original = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check"></i>&nbsp;Copied';
+          setTimeout(() => { btn.innerHTML = original; }, 1600);
+        });
+      });
+    })();
+  </script>
+
 </div> <!-- /container -->
 
 
